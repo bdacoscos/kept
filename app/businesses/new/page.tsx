@@ -35,18 +35,28 @@ function deserializeSocialHandles(text: string): Record<string, string> {
   return result;
 }
 
-function fileToBase64(
-  file: File
+function compressImage(
+  file: File,
+  maxDimension = 1200,
+  quality = 0.82
 ): Promise<{ base64: string; mediaType: string }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const [header, base64] = dataUrl.split(',');
-      const mediaType = header.split(':')[1].split(';')[0];
-      resolve({ base64, mediaType });
-    };
     reader.onerror = reject;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const base64 = canvas.toDataURL('image/jpeg', quality).split(',')[1];
+        resolve({ base64, mediaType: 'image/jpeg' });
+      };
+      img.src = reader.result as string;
+    };
     reader.readAsDataURL(file);
   });
 }
@@ -97,7 +107,7 @@ export default function NewBusinessPage() {
     setScanError(null);
 
     try {
-      const { base64, mediaType } = await fileToBase64(imageFile);
+      const { base64, mediaType } = await compressImage(imageFile);
       const response = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

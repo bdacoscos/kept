@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unsupported media type' }, { status: 400 });
     }
 
-    if (base64Image.length > 1_500_000) {
+    if (base64Image.length > 6_000_000) {
       return NextResponse.json({ error: 'Image too large' }, { status: 400 });
     }
 
