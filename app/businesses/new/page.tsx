@@ -279,9 +279,27 @@ export default function NewBusinessPage() {
     <div className="max-w-lg mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Review</h1>
 
-      {previewUrl && (
+      {previewUrl ? (
         <div className="mb-6">
           <CardImageViewer src={previewUrl} />
+        </div>
+      ) : (
+        <div className="mb-6">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 transition-colors"
+          >
+            Add photo (optional)
+          </button>
         </div>
       )}
 
